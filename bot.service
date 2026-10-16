@@ -1,0 +1,15 @@
+[Unit]
+Description=Universal Video Downloader Telegram Bot
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/var/www/bot
+ExecStart=/var/www/bot/venv/bin/python /var/www/bot/run.py
+Restart=always
+RestartSec=10
+EnvironmentFile=/var/www/bot/.env
+
+[Install]
+WantedBy=multi-user.target
