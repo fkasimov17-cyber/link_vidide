@@ -34,8 +34,24 @@ async def main():
 
     logger.info("Bot ishga tushirilmoqda...")
 
+    import os
+    from aiogram.client.session.aiohttp import AiohttpSession
+    from aiohttp import ClientSession, TCPConnector
+
+    class ResilientSession(AiohttpSession):
+        async def create_session(self) -> ClientSession:
+            if self._session is None or self._session.closed:
+                # Windows yoki maxsus korporativ tarmoqlarda SSL muammosini oldini olish
+                if os.name == "nt":
+                    connector = TCPConnector(ssl=False)
+                else:
+                    connector = TCPConnector()
+                self._session = ClientSession(connector=connector)
+            return self._session
+
     bot = Bot(
         token=BOT_TOKEN,
+        session=ResilientSession(),
         default=DefaultBotProperties(parse_mode=ParseMode.HTML)
     )
     dp = Dispatcher()
