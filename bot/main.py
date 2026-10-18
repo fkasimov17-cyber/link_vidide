@@ -59,8 +59,20 @@ async def main():
     # Routerlarni ulash
     dp.include_router(main_router)
 
-    # Eski kutilayotgan yangilanishlarni (updates) o'chirib tashlash
-    await bot.delete_webhook(drop_pending_updates=True)
+    # Render.com yoki boshqa bulutli xizmatlarning bepul Web Service rejimi uchun (health check)
+    port = os.getenv("PORT")
+    if port:
+        from aiohttp import web
+        app = web.Application()
+        async def handle_ping(request):
+            return web.Response(text="Link Vidide Bot is running!")
+        app.router.add_get("/", handle_ping)
+        app.router.add_get("/health", handle_ping)
+        runner = web.AppRunner(app)
+        await runner.setup()
+        site = web.TCPSite(runner, "0.0.0.0", int(port))
+        await site.start()
+        logger.info(f"Health-check veb-server {port}-portda ishga tushdi.")
 
     logger.info("Bot muvaffaqiyatli ishga tushdi va xabarlarni kutmoqda!")
     try:
